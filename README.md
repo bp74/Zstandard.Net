@@ -8,31 +8,38 @@ http://facebook.github.io/zstd/
 
 ## Example
 
-	byte[] input = GetTestData();
-	byte[] compressed = null;
-	byte[] output = null;
+```csharp
+byte[] input = GetTestData();
+byte[] compressed = null;
+byte[] output = null;
 
-	// compress
-	using (var memoryStream = new MemoryStream())
-	using (var compressionStream = new ZstandardStream(memoryStream, compressionLevel: 19))
-	{
-		//compressionStream.CompressionLevel = 6; // maxCompressionLevel;
-		compressionStream.Write(input, 0, input.Length);
-		compressionStream.Close();
-		compressed = memoryStream.ToArray();
-	}
+// load a dictionary that is trained for the data (optional).
+var dictionary = new ZstandardDictionary("loremipsum.zdict");
 
-	// decompress
-	using (var memoryStream = new MemoryStream(compressed))
-	using (var compressionStream = new ZstandardStream(memoryStream, CompressionMode.Decompress))
-	using (var temp = new MemoryStream())
-	{
-		compressionStream.CopyTo(temp);
-		output = temp.ToArray();
-	}
+// compress
+using (var memoryStream = new MemoryStream())
+using (var compressionStream = new ZstandardStream(memoryStream, CompressionMode.Compress))
+{
+	compressionStream.CompressionLevel = 11;               // optional!!
+	compressionStream.CompressionDictionary = dictionary;  // optional!!
+	compressionStream.Write(input, 0, input.Length);
+	compressionStream.Close();
+	compressed = memoryStream.ToArray();
+}
 
-	// test output
-	if (output.SequenceEqual(input) == false)
-	{
-		throw new Exception("Output is different from input!");
-	}
+// decompress
+using (var memoryStream = new MemoryStream(compressed))
+using (var compressionStream = new ZstandardStream(memoryStream, CompressionMode.Decompress))
+using (var temp = new MemoryStream())
+{
+	compressionStream.CompressionDictionary = dictionary;  // optional!!
+	compressionStream.CopyTo(temp);
+	output = temp.ToArray();
+}
+
+// test output
+if (output.SequenceEqual(input) == false)
+{
+	throw new Exception("Output is different from input!");
+}
+```
