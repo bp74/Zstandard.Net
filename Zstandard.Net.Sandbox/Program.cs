@@ -20,7 +20,7 @@ namespace Zstandard.Net.Sandbox
 
             // compress
             using (var memoryStream = new MemoryStream())
-            using (var compressionStream = new ZstandardStream(memoryStream, compressionLevel: 10))
+            using (var compressionStream = new ZstandardStream(memoryStream, compressionLevel: 19))
             {
                 //compressionStream.CompressionLevel = 6; // maxCompressionLevel;
                 compressionStream.Write(input, 0, input.Length);
@@ -50,6 +50,7 @@ namespace Zstandard.Net.Sandbox
             Console.WriteLine($"-------------------------------------------");
             Console.WriteLine($"Ratio       : {1.0f * input.Length / compressed.Length}");
             Console.WriteLine($"Time        : {stopwatch.Elapsed.TotalMilliseconds} ms");
+            Console.WriteLine($"Is64Bit     : {Environment.Is64BitProcess}");
 
             Console.Read();
         }

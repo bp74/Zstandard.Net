@@ -3,15 +3,30 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <RootNamespace>Zstandard.Net</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>bp74</Authors>
+    <Company>bp74</Company>
+    <Description>A ZstandardStream implementation on top of the native Zstandard libraries.</Description>
+    <PackageProjectUrl>https://github.com/bp74/Zstandard.Net</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/bp74/Zstandard.Net/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/bp74/Zstandard.Net</RepositoryUrl>
+    <PackageTags>Compression Stream Zstandard Zstd</PackageTags>
+    <PackageReleaseNotes>First release with support for stream compression and decompression.</PackageReleaseNotes>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Update="libzstd32.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="libzstd64.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="build\x64\libzstd.dll">
+			<Link>x64\%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="build\x86\libzstd.dll">
+			<Link>x86\%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+  
+	<ItemGroup>
+		<None Include="build\**\*" Pack="true" PackagePath="build\" />
+	</ItemGroup>
 
 </Project>
