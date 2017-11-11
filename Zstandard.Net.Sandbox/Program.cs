@@ -13,14 +13,14 @@ namespace Zstandard.Net.Sandbox
             var version = ZstandardStream.Version;
             var maxCompressionLevel = ZstandardStream.MaxCompressionLevel;
 
-            // var input1 = GetTestFile("kennedy.xls", 6);
-            // StandardCompression(input1);
-            // Console.Read();
+            var input1 = GetTestFile("kennedy.xls");
+            StandardCompression(input1, 6);
+            Console.ReadLine();
 
             var input2 = File.ReadAllBytes("loremipsum.txt");
             var dictionary = new ZstandardDictionary("loremipsum.zdict");
             DictionaryCompression(input2, dictionary, 22);
-            Console.Read();
+            Console.ReadLine();
         }
 
         //-----------------------------------------------------------------------------------------
