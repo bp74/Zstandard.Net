@@ -6,3 +6,33 @@ Zstandard is a real-time compression algorithm, providing high compression ratio
 
 http://facebook.github.io/zstd/
 
+## Example
+
+	byte[] input = GetTestData();
+	byte[] compressed = null;
+	byte[] output = null;
+
+	// compress
+	using (var memoryStream = new MemoryStream())
+	using (var compressionStream = new ZstandardStream(memoryStream, compressionLevel: 19))
+	{
+		//compressionStream.CompressionLevel = 6; // maxCompressionLevel;
+		compressionStream.Write(input, 0, input.Length);
+		compressionStream.Close();
+		compressed = memoryStream.ToArray();
+	}
+
+	// decompress
+	using (var memoryStream = new MemoryStream(compressed))
+	using (var compressionStream = new ZstandardStream(memoryStream, CompressionMode.Decompress))
+	using (var temp = new MemoryStream())
+	{
+		compressionStream.CopyTo(temp);
+		output = temp.ToArray();
+	}
+
+	// test output
+	if (output.SequenceEqual(input) == false)
+	{
+		throw new Exception("Output is different from input!");
+	}
