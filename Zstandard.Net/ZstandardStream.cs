@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using Interop = Zstandard.Net.ZstandardInterop;
 
 namespace Zstandard.Net
 {
@@ -25,8 +26,8 @@ namespace Zstandard.Net
         private int dataPosition = 0;
         private int dataSize = 0;
 
-        private ZstandardInterop.Buffer outputBuffer = new ZstandardInterop.Buffer();
-        private ZstandardInterop.Buffer inputBuffer = new ZstandardInterop.Buffer();
+        private Interop.Buffer outputBuffer = new Interop.Buffer();
+        private Interop.Buffer inputBuffer  = new Interop.Buffer();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZstandardStream"/> class by using the specified stream and compression mode, and optionally leaves the stream open.
@@ -42,17 +43,17 @@ namespace Zstandard.Net
 
             if (mode == CompressionMode.Compress)
             {
-                this.zstreamInputSize = ZstandardInterop.GetCompressionStreamInputSize();
-                this.zstreamOutputSize = ZstandardInterop.GetCompressionStreamOutputSize();
-                this.zstream = ZstandardInterop.CreateCompressionStream();
+                this.zstreamInputSize = Interop.ZSTD_CStreamInSize().ToUInt32();
+                this.zstreamOutputSize = Interop.ZSTD_CStreamOutSize().ToUInt32();
+                this.zstream = Interop.ZSTD_createCStream();
                 this.data = new byte[this.zstreamOutputSize];
             }
 
             if (mode == CompressionMode.Decompress)
             {
-                this.zstreamInputSize = ZstandardInterop.GetDecompressionStreamInputSize();
-                this.zstreamOutputSize = ZstandardInterop.GetDecompressionStreamOutputSize();
-                this.zstream = ZstandardInterop.CreateDecompressionStream();
+                this.zstreamInputSize = Interop.ZSTD_DStreamInSize().ToUInt32();
+                this.zstreamOutputSize = Interop.ZSTD_DStreamOutSize().ToUInt32();
+                this.zstream = Interop.ZSTD_createDStream();
                 this.data = new byte[this.zstreamInputSize];
             }
         }
@@ -78,7 +79,7 @@ namespace Zstandard.Net
         {
             get
             {
-                var version = (int)ZstandardInterop.GetVersionNumber();
+                var version = (int)Interop.ZSTD_versionNumber();
                 return new Version((version / 10000) % 100, (version / 100) % 100, version % 100);
             }
         }
@@ -90,7 +91,7 @@ namespace Zstandard.Net
         {
             get
             {
-                return ZstandardInterop.GetMaxCompressionLevel();
+                return Interop.ZSTD_maxCLevel();
             }
         }
 
@@ -150,16 +151,16 @@ namespace Zstandard.Net
             }
             else if (this.mode == CompressionMode.Compress)
             {
-                this.ProcessStream((zcs, buffer) => ZstandardInterop.FlushStream(zcs, buffer));
-                this.ProcessStream((zcs, buffer) => ZstandardInterop.EndStream(zcs, buffer));
+                this.ProcessStream((zcs, buffer) => Interop.ThrowIfError(Interop.ZSTD_flushStream(zcs, buffer)));
+                this.ProcessStream((zcs, buffer) => Interop.ThrowIfError(Interop.ZSTD_endStream(zcs, buffer)));
                 this.stream.Flush();
 
-                ZstandardInterop.FreeCompressionStream(this.zstream);
+                Interop.ZSTD_freeCStream(this.zstream);
                 if (!this.leaveOpen) this.stream.Close();
             }
             else if (this.mode == CompressionMode.Decompress)
             {
-                ZstandardInterop.FreeDecompressionStream(this.zstream);
+                Interop.ZSTD_freeDStream(this.zstream);
                 if (!this.leaveOpen) this.stream.Close();
             }
 
@@ -171,7 +172,7 @@ namespace Zstandard.Net
         {
             if (this.mode == CompressionMode.Compress)
             {
-                this.ProcessStream((zcs, buffer) => ZstandardInterop.FlushStream(zcs, buffer));
+                this.ProcessStream((zcs, buffer) => Interop.ThrowIfError(Interop.ZSTD_flushStream(zcs, buffer)));
                 this.stream.Flush();
             }
         }
@@ -192,7 +193,7 @@ namespace Zstandard.Net
                 if (this.isInitialized == false)
                 {
                     this.isInitialized = true;
-                    ZstandardInterop.InitDecompressionStream(this.zstream);
+                    Interop.ZSTD_initDStream(this.zstream);
                 }
 
                 while (count > 0)
@@ -219,7 +220,7 @@ namespace Zstandard.Net
                     this.outputBuffer.Position = UIntPtr.Zero;
 
                     // decompress inputBuffer to outputBuffer
-                    ZstandardInterop.ReadFromDecompressionStream(this.zstream, this.outputBuffer, this.inputBuffer);
+                    Interop.ThrowIfError(Interop.ZSTD_decompressStream(this.zstream, this.outputBuffer, this.inputBuffer));
 
                     // calculate progress in outputBuffer
                     var outputBufferPosition = (int)this.outputBuffer.Position.ToUInt32();
@@ -255,7 +256,7 @@ namespace Zstandard.Net
                 if (this.isInitialized == false)
                 {
                     this.isInitialized = true;
-                    ZstandardInterop.InitCompressionStream(this.zstream, this.CompressionLevel);
+                    Interop.ZSTD_initCStream(this.zstream, this.CompressionLevel);
                 }
 
                 while (count > 0)
@@ -273,7 +274,7 @@ namespace Zstandard.Net
                     this.inputBuffer.Position = UIntPtr.Zero;
 
                     // compress inputBuffer to outputBuffer
-                    ZstandardInterop.WriteToCompressionStream(this.zstream, this.outputBuffer, this.inputBuffer);
+                    Interop.ThrowIfError(Interop.ZSTD_compressStream(this.zstream, this.outputBuffer, this.inputBuffer));
 
                     // write data to output stream
                     var outputBufferPosition = (int)this.outputBuffer.Position.ToUInt32();
@@ -305,7 +306,7 @@ namespace Zstandard.Net
         //-----------------------------------------------------------------------------------------
         //-----------------------------------------------------------------------------------------
 
-        private void ProcessStream(Action<IntPtr, ZstandardInterop.Buffer> outputAction)
+        private void ProcessStream(Action<IntPtr, Interop.Buffer> outputAction)
         {
             var alloc = GCHandle.Alloc(this.data, GCHandleType.Pinned);
 
