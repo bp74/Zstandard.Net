@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Zstandard.Net.Sandbox
 {
@@ -14,6 +12,7 @@ namespace Zstandard.Net.Sandbox
         {
             var version = ZstandardStream.Version;
             var maxCompressionLevel = ZstandardStream.MaxCompressionLevel;
+            var stopwatch = Stopwatch.StartNew();
 
             var input = GetTestFile("kennedy.xls");
             var compressed = default(byte[]);
@@ -21,9 +20,9 @@ namespace Zstandard.Net.Sandbox
 
             // compress
             using (var memoryStream = new MemoryStream())
-            using (var compressionStream = new ZstandardStream(memoryStream, CompressionMode.Compress))
+            using (var compressionStream = new ZstandardStream(memoryStream, compressionLevel: 10))
             {
-                compressionStream.CompressionLevel = maxCompressionLevel;
+                //compressionStream.CompressionLevel = 6; // maxCompressionLevel;
                 compressionStream.Write(input, 0, input.Length);
                 compressionStream.Close();
                 compressed = memoryStream.ToArray();
@@ -32,12 +31,10 @@ namespace Zstandard.Net.Sandbox
             // decompress
             using (var memoryStream = new MemoryStream(compressed))
             using (var compressionStream = new ZstandardStream(memoryStream, CompressionMode.Decompress))
+            using (var temp = new MemoryStream())
             {
-                using (var ms = new MemoryStream())
-                {
-                    compressionStream.CopyTo(ms);
-                    output = ms.ToArray();
-                }
+                compressionStream.CopyTo(temp);
+                output = temp.ToArray();
             }
 
             // test output
@@ -45,6 +42,16 @@ namespace Zstandard.Net.Sandbox
             {
                 throw new Exception("Output is different from input!");
             }
+
+            // write info
+            Console.WriteLine($"Input       : {input.Length}");
+            Console.WriteLine($"Compressed  : {compressed.Length}");
+            Console.WriteLine($"Output      : {output.Length}");
+            Console.WriteLine($"-------------------------------------------");
+            Console.WriteLine($"Ratio       : {1.0f * input.Length / compressed.Length}");
+            Console.WriteLine($"Time        : {stopwatch.Elapsed.TotalMilliseconds} ms");
+
+            Console.Read();
         }
 
         static byte[] GetTestFile(string name)

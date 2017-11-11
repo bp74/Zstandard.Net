@@ -57,6 +57,17 @@ namespace Zstandard.Net
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZstandardStream"/> class  by using the specified stream and compression level, and optionally leaves the stream open.
+        /// </summary>
+        /// <param name="stream">The stream to compress.</param>
+        /// <param name="compressionLevel">The compression level.</param>
+        /// <param name="leaveOpen">true to leave the stream open after disposing the <see cref="ZstandardStream"/> object; otherwise, false.</param>
+        public ZstandardStream(Stream stream, int compressionLevel, bool leaveOpen = false) : this(stream, CompressionMode.Compress, leaveOpen)
+        {
+            this.CompressionLevel = compressionLevel;
+        }
+
         //-----------------------------------------------------------------------------------------
         //-----------------------------------------------------------------------------------------
 
@@ -87,7 +98,7 @@ namespace Zstandard.Net
         //-----------------------------------------------------------------------------------------
 
         /// <summary>
-        /// The compression level to use, the default is 6.
+        /// Gets or sets the compression level to use, the default is 6.
         /// </summary>
         /// <remarks>
         /// To get the maximum compression level see <see cref="MaxCompressionLevel"/>.
@@ -149,7 +160,7 @@ namespace Zstandard.Net
             else if (this.mode == CompressionMode.Decompress)
             {
                 ZstandardInterop.FreeDecompressionStream(this.zstream);
-                if (!leaveOpen) this.stream.Close();
+                if (!this.leaveOpen) this.stream.Close();
             }
 
             this.isClosed = true;
@@ -170,12 +181,14 @@ namespace Zstandard.Net
             if (this.CanRead == false) throw new NotSupportedException();
             if (count == 0) return 0;
 
-            var length = 0;
-            var alloc1 = GCHandle.Alloc(this.data, GCHandleType.Pinned);
-            var alloc2 = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            // prevent the buffers from being moved around by the garbage collector
+            var alloc1 = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+            var alloc2 = GCHandle.Alloc(this.data, GCHandleType.Pinned);
 
             try
             {
+                var length = 0;
+
                 if (this.isInitialized == false)
                 {
                     this.isInitialized = true;
