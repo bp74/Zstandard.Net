@@ -14,4 +14,10 @@
     <ProjectReference Include="..\Zstandard.Net\Zstandard.Net.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Test.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
