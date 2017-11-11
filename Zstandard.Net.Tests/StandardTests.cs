@@ -7,12 +7,12 @@ using System.Linq;
 namespace Zstandard.Net.Tests
 {
     [TestClass]
-    public class CompressionTests
+    public class StandardTests
     {
         [TestMethod]
-        public void ZstandardStream_AllCompressionLevels_CorrectCompression()
+        public void StandardCompression_AllCompressionLevels_CorrectCompression()
         {
-            var data = File.ReadAllBytes("Test.txt");
+            var data = File.ReadAllBytes("Data/Test.txt");
 
             for (int i = 1; i <= ZstandardStream.MaxCompressionLevel; i++)
             {
@@ -23,16 +23,16 @@ namespace Zstandard.Net.Tests
         }
 
         [TestMethod]
-        public void ZstandardStream_DifferentCompressionLevels_DifferentCompressionRatios()
+        public void StandardCompression_DifferentCompressionLevels_DifferentCompressionRatios()
         {
-            var data = File.ReadAllBytes("Test.txt");
+            var data = File.ReadAllBytes("Data/Test.txt");
             var compressedMin = this.Compress(data, 1);
             var compressedMax = this.Compress(data, ZstandardStream.MaxCompressionLevel);
             Assert.IsTrue(compressedMin.Length > compressedMax.Length);
         }
 
         [TestMethod]
-        public void ZstandardStream_IncompressibleData_NoCompression()
+        public void StandardCompression_IncompressibleData_NoCompression()
         {
             var data = this.GetRandomData(65536);
             var compressed = this.Compress(data, 11);
