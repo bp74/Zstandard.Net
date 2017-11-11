@@ -12,17 +12,31 @@ namespace Zstandard.Net.Sandbox
         {
             var version = ZstandardStream.Version;
             var maxCompressionLevel = ZstandardStream.MaxCompressionLevel;
-            var stopwatch = Stopwatch.StartNew();
 
-            var input = GetTestFile("kennedy.xls");
+            // var input1 = GetTestFile("kennedy.xls", 6);
+            // StandardCompression(input1);
+            // Console.Read();
+
+            var input2 = File.ReadAllBytes("loremipsum.txt");
+            var dictionary = new ZstandardDictionary("loremipsum.zdict");
+            DictionaryCompression(input2, dictionary, 22);
+            Console.Read();
+        }
+
+        //-----------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
+
+        private static void StandardCompression(byte[] input, int compressionLevel)
+        {
+            var stopwatch = Stopwatch.StartNew();
             var compressed = default(byte[]);
             var output = default(byte[]);
 
             // compress
             using (var memoryStream = new MemoryStream())
-            using (var compressionStream = new ZstandardStream(memoryStream, compressionLevel: 19))
+            using (var compressionStream = new ZstandardStream(memoryStream, CompressionMode.Compress))
             {
-                //compressionStream.CompressionLevel = 6; // maxCompressionLevel;
+                compressionStream.CompressionLevel = compressionLevel;
                 compressionStream.Write(input, 0, input.Length);
                 compressionStream.Close();
                 compressed = memoryStream.ToArray();
@@ -51,9 +65,58 @@ namespace Zstandard.Net.Sandbox
             Console.WriteLine($"Ratio       : {1.0f * input.Length / compressed.Length}");
             Console.WriteLine($"Time        : {stopwatch.Elapsed.TotalMilliseconds} ms");
             Console.WriteLine($"Is64Bit     : {Environment.Is64BitProcess}");
-
-            Console.Read();
+            Console.WriteLine();
         }
+
+        //-----------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
+
+        private static void DictionaryCompression(byte[] input, ZstandardDictionary dictionary, int compressionLevel)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            var compressed = default(byte[]);
+            var output = default(byte[]);
+
+            // compress
+            using (var memoryStream = new MemoryStream())
+            using (var compressionStream = new ZstandardStream(memoryStream, CompressionMode.Compress))
+            {
+                compressionStream.CompressionLevel = compressionLevel;
+                compressionStream.CompressionDictionary = dictionary;
+                compressionStream.Write(input, 0, input.Length);
+                compressionStream.Close();
+                compressed = memoryStream.ToArray();
+            }
+
+            // decompress
+            using (var memoryStream = new MemoryStream(compressed))
+            using (var compressionStream = new ZstandardStream(memoryStream, CompressionMode.Decompress))
+            using (var temp = new MemoryStream())
+            {
+                compressionStream.CompressionDictionary = dictionary;
+                compressionStream.CopyTo(temp);
+                output = temp.ToArray();
+            }
+
+            // test output
+            if (output.SequenceEqual(input) == false)
+            {
+                throw new Exception("Output is different from input!");
+            }
+
+            // write info
+            Console.WriteLine($"Input       : {input.Length}");
+            Console.WriteLine($"Compressed  : {compressed.Length}");
+            Console.WriteLine($"Output      : {output.Length}");
+            Console.WriteLine($"-------------------------------------------");
+            Console.WriteLine($"Ratio       : {1.0f * input.Length / compressed.Length}");
+            Console.WriteLine($"Time        : {stopwatch.Elapsed.TotalMilliseconds} ms");
+            Console.WriteLine($"Is64Bit     : {Environment.Is64BitProcess}");
+            Console.WriteLine();
+        }
+
+        //-----------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         static byte[] GetTestFile(string name)
         {

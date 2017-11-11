@@ -107,6 +107,14 @@ namespace Zstandard.Net
         public int CompressionLevel { get; set; } = 6;
 
         /// <summary>
+        /// Gets or sets the compression dictionary tp use, the default is null.
+        /// </summary>
+        /// <value>
+        /// The compression dictionary.
+        /// </value>
+        public ZstandardDictionary CompressionDictionary { get; set; } = null;
+
+        /// <summary>
         /// Gets whether the current stream supports reading.
         /// </summary>
         public override bool CanRead => this.stream.CanRead && this.mode == CompressionMode.Decompress;
@@ -193,7 +201,10 @@ namespace Zstandard.Net
                 if (this.isInitialized == false)
                 {
                     this.isInitialized = true;
-                    Interop.ZSTD_initDStream(this.zstream);
+
+                    var result = this.CompressionDictionary == null
+                        ? Interop.ZSTD_initDStream(this.zstream)
+                        : Interop.ZSTD_initDStream_usingDDict(this.zstream, this.CompressionDictionary.GetDecompressionDictionary());
                 }
 
                 while (count > 0)
@@ -256,7 +267,10 @@ namespace Zstandard.Net
                 if (this.isInitialized == false)
                 {
                     this.isInitialized = true;
-                    Interop.ZSTD_initCStream(this.zstream, this.CompressionLevel);
+
+                    var result = this.CompressionDictionary == null
+                        ? Interop.ZSTD_initCStream(this.zstream, this.CompressionLevel)
+                        : Interop.ZSTD_initCStream_usingCDict(this.zstream, this.CompressionDictionary.GetCompressionDictionary(this.CompressionLevel));
                 }
 
                 while (count > 0)
