@@ -26,7 +26,7 @@ namespace Zstandard.Net
         /// <summary>
         /// Initializes a new instance of the <see cref="ZstandardDictionary"/> class.
         /// </summary>
-        /// <param name="dictionary">The raw data of the dictionary.</param>
+        /// <param name="dictionary">The dictionary raw data.</param>
         public ZstandardDictionary(byte[] dictionary)
         {
             this.dictionary = dictionary;
@@ -35,10 +35,23 @@ namespace Zstandard.Net
         /// <summary>
         /// Initializes a new instance of the <see cref="ZstandardDictionary"/> class.
         /// </summary>
-        /// <param name="path">The path to the dictionary file.</param>
-        public ZstandardDictionary(string path)
+        /// <param name="dictionaryPath">The dictionary path.</param>
+        public ZstandardDictionary(string dictionaryPath)
         {
-            this.dictionary = File.ReadAllBytes(path);
+            this.dictionary = File.ReadAllBytes(dictionaryPath);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZstandardDictionary"/> class.
+        /// </summary>
+        /// <param name="dictionaryStream">The dictionary stream.</param>
+        public ZstandardDictionary(Stream dictionaryStream)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                dictionaryStream.CopyTo(memoryStream);
+                this.dictionary = memoryStream.ToArray();
+            }
         }
 
         /// <summary>
