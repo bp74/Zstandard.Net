@@ -27,7 +27,16 @@ namespace Zstandard.Net
         /// <summary>
         /// Initializes a new instance of the <see cref="ZstandardDictionary"/> class.
         /// </summary>
-        /// <param name="path">The path.</param>
+        /// <param name="dictionary">The raw data of the dictionary.</param>
+        public ZstandardDictionary(byte[] dictionary)
+        {
+            this.dictionary = dictionary;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZstandardDictionary"/> class.
+        /// </summary>
+        /// <param name="path">The path to the dictionary file.</param>
         public ZstandardDictionary(string path)
         {
             this.dictionary = File.ReadAllBytes(path);
