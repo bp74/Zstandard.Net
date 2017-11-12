@@ -188,7 +188,6 @@ namespace Zstandard.Net
         public override int Read(byte[] buffer, int offset, int count)
         {
             if (this.CanRead == false) throw new NotSupportedException();
-            if (count == 0) return 0;
 
             // prevent the buffers from being moved around by the garbage collector
             var alloc1 = GCHandle.Alloc(buffer, GCHandleType.Pinned);
