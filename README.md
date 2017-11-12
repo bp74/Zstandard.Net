@@ -43,3 +43,10 @@ if (output.SequenceEqual(input) == false)
 	throw new Exception("Output is different from input!");
 }
 ```
+
+# NuGet
+
+Download the library from NuGet:
+
+https://www.nuget.org/packages/Zstandard.Net/
+
