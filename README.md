@@ -44,7 +44,7 @@ if (output.SequenceEqual(input) == false)
 }
 ```
 
-# NuGet
+## NuGet
 
 Download the library from NuGet:
 
