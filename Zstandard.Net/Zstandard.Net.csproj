@@ -11,8 +11,8 @@
     <PackageLicenseUrl>https://github.com/bp74/Zstandard.Net/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/bp74/Zstandard.Net</RepositoryUrl>
     <PackageTags>Compression Stream Zstandard Zstd</PackageTags>
-    <PackageReleaseNotes>Added support for Zstandard dictionaries.</PackageReleaseNotes>
-    <Version>1.1.0</Version>
+    <PackageReleaseNotes>Fixed Windows specific p/invoke.</PackageReleaseNotes>
+    <Version>1.1.1</Version>
   </PropertyGroup>
 
 	<ItemGroup>
