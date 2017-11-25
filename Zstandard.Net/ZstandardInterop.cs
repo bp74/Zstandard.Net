@@ -8,10 +8,13 @@ namespace Zstandard.Net
     {
         static ZstandardInterop()
         {
-            var root = Path.GetDirectoryName(typeof(ZstandardInterop).Assembly.Location);
-            var path = Environment.Is64BitProcess ? "x64" : "x86";
-            var file = Path.Combine(root, path, "libzstd.dll");
-            LoadLibraryEx(file, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                var root = Path.GetDirectoryName(typeof(ZstandardInterop).Assembly.Location);
+                var path = Environment.Is64BitProcess ? "x64" : "x86";
+                var file = Path.Combine(root, path, "libzstd.dll");
+                LoadLibraryEx(file, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -51,90 +54,90 @@ namespace Zstandard.Net
             LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008
         }
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("kernel32", SetLastError = true)]
         private static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hReservedNull, LoadLibraryFlags dwFlags);
 
         //-----------------------------------------------------------------------------------------
         //-----------------------------------------------------------------------------------------
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern uint ZSTD_versionNumber();
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ZSTD_maxCLevel();
 
         //-----------------------------------------------------------------------------------------
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr ZSTD_createCStream();
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_initCStream(IntPtr zcs, int compressionLevel);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_freeCStream(IntPtr zcs);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_CStreamInSize();
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_CStreamOutSize();
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_compressStream(IntPtr zcs, [MarshalAs(UnmanagedType.LPStruct)] Buffer outputBuffer, [MarshalAs(UnmanagedType.LPStruct)] Buffer inputBuffer);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr ZSTD_createCDict(IntPtr dictBuffer, UIntPtr dictSize, int compressionLevel);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_freeCDict(IntPtr cdict);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_initCStream_usingCDict(IntPtr zcs, IntPtr cdict);
 
         //-----------------------------------------------------------------------------------------
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr ZSTD_createDStream();
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_initDStream(IntPtr zds);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_freeDStream(IntPtr zds);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_DStreamInSize();
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_DStreamOutSize();
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_decompressStream(IntPtr zds, [MarshalAs(UnmanagedType.LPStruct)] Buffer outputBuffer, [MarshalAs(UnmanagedType.LPStruct)] Buffer inputBuffer);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr ZSTD_createDDict(IntPtr dictBuffer, UIntPtr dictSize);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_freeDDict(IntPtr ddict);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_initDStream_usingDDict(IntPtr zds, IntPtr ddict);
 
         //-----------------------------------------------------------------------------------------
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_flushStream(IntPtr zcs, [MarshalAs(UnmanagedType.LPStruct)] Buffer outputBuffer);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr ZSTD_endStream(IntPtr zcs, [MarshalAs(UnmanagedType.LPStruct)] Buffer outputBuffer);
         
         //-----------------------------------------------------------------------------------------
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool ZSTD_isError(UIntPtr code);
 
-        [DllImport("libzstd.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("libzstd", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr ZSTD_getErrorName(UIntPtr code);
     }
 }
