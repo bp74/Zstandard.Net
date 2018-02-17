@@ -46,6 +46,8 @@ namespace Zstandard.Net
             this.mode = mode;
             this.leaveOpen = leaveOpen;
 
+            byte[] data = null;
+
             if (mode == CompressionMode.Compress)
             {
                 this.zstreamInputSize = Interop.ZSTD_CStreamInSize().ToUInt32();
