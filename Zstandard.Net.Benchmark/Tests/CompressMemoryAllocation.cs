@@ -7,6 +7,7 @@ using System.IO.Compression;
 namespace Zstandard.Net.Benchmark.Tests
 {
     [MemoryDiagnoser]
+    //[Config(typeof(DontForceGcCollectionsConfig))]
     public class CompressMemoryAllocation
     {
         //private static byte[] data = Program.GetTestFile("fields.c"); // 10 KB

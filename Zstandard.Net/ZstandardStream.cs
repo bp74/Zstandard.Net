@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Buffers;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
@@ -29,10 +29,8 @@ namespace Zstandard.Net
         private int dataSize = 0;
 
         private Interop.Buffer outputBuffer = new Interop.Buffer();
-        private Interop.Buffer inputBuffer  = new Interop.Buffer();
-
-        private static ConcurrentBag<byte[]> cDataPool = new ConcurrentBag<byte[]>();
-        private static ConcurrentBag<byte[]> dDataPool = new ConcurrentBag<byte[]>();
+        private Interop.Buffer inputBuffer = new Interop.Buffer();
+        private ArrayPool<byte> arrayPool = ArrayPool<byte>.Shared;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZstandardStream"/> class by using the specified stream and compression mode, and optionally leaves the stream open.
@@ -46,14 +44,12 @@ namespace Zstandard.Net
             this.mode = mode;
             this.leaveOpen = leaveOpen;
 
-            byte[] data = null;
-
             if (mode == CompressionMode.Compress)
             {
                 this.zstreamInputSize = Interop.ZSTD_CStreamInSize().ToUInt32();
                 this.zstreamOutputSize = Interop.ZSTD_CStreamOutSize().ToUInt32();
                 this.zstream = Interop.ZSTD_createCStream();
-                this.data = cDataPool.TryTake(out data) ? data : new byte[this.zstreamOutputSize];
+                this.data = arrayPool.Rent((int)this.zstreamOutputSize);
             }
 
             if (mode == CompressionMode.Decompress)
@@ -61,7 +57,7 @@ namespace Zstandard.Net
                 this.zstreamInputSize = Interop.ZSTD_DStreamInSize().ToUInt32();
                 this.zstreamOutputSize = Interop.ZSTD_DStreamOutSize().ToUInt32();
                 this.zstream = Interop.ZSTD_createDStream();
-                this.data = dDataPool.TryTake(out data) ? data : new byte[this.zstreamInputSize];
+                this.data = arrayPool.Rent((int)this.zstreamInputSize);
             }
         }
 
@@ -159,16 +155,7 @@ namespace Zstandard.Net
 
             if (this.isDisposed == false)
             {
-                if (mode == CompressionMode.Compress && cDataPool.Count < 8)
-                {
-                    cDataPool.Add(this.data);
-                }
-
-                if (mode == CompressionMode.Decompress && dDataPool.Count < 8)
-                {
-                    dDataPool.Add(this.data);
-                }
-
+                this.arrayPool.Return(this.data, clearArray: false);
                 this.isDisposed = true;
                 this.data = null;
             }
@@ -236,7 +223,7 @@ namespace Zstandard.Net
                     // read data from input stream 
                     if (inputSize <= 0 && this.dataDepleted == false)
                     {
-                        this.dataSize = this.stream.Read(this.data, 0, this.data.Length);
+                        this.dataSize = this.stream.Read(this.data, 0, (int)this.zstreamInputSize);
                         this.dataDepleted = this.dataSize <= 0;
                         this.dataPosition = 0;
                         inputSize = this.dataDepleted ? 0 : this.dataSize;
@@ -301,7 +288,7 @@ namespace Zstandard.Net
 
                     // configure the outputBuffer
                     this.outputBuffer.Data = Marshal.UnsafeAddrOfPinnedArrayElement(this.data, 0);
-                    this.outputBuffer.Size = new UIntPtr((uint)this.data.Length);
+                    this.outputBuffer.Size = new UIntPtr(this.zstreamOutputSize);
                     this.outputBuffer.Position = UIntPtr.Zero;
 
                     // configure the inputBuffer
@@ -349,7 +336,7 @@ namespace Zstandard.Net
             try
             {
                 this.outputBuffer.Data = Marshal.UnsafeAddrOfPinnedArrayElement(this.data, 0);
-                this.outputBuffer.Size = new UIntPtr((uint)this.data.Length);
+                this.outputBuffer.Size = new UIntPtr(this.zstreamOutputSize);
                 this.outputBuffer.Position = UIntPtr.Zero;
 
                 outputAction(this.zstream, this.outputBuffer);
