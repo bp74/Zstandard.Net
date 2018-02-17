@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
@@ -15,6 +16,7 @@ namespace Zstandard.Net
         private CompressionMode mode;
         private Boolean leaveOpen;
         private Boolean isClosed = false;
+        private Boolean isDisposed = false;
         private Boolean isInitialized = false;
 
         private IntPtr zstream;
@@ -28,6 +30,9 @@ namespace Zstandard.Net
 
         private Interop.Buffer outputBuffer = new Interop.Buffer();
         private Interop.Buffer inputBuffer  = new Interop.Buffer();
+
+        private static ConcurrentBag<byte[]> cDataPool = new ConcurrentBag<byte[]>();
+        private static ConcurrentBag<byte[]> dDataPool = new ConcurrentBag<byte[]>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZstandardStream"/> class by using the specified stream and compression mode, and optionally leaves the stream open.
@@ -46,7 +51,7 @@ namespace Zstandard.Net
                 this.zstreamInputSize = Interop.ZSTD_CStreamInSize().ToUInt32();
                 this.zstreamOutputSize = Interop.ZSTD_CStreamOutSize().ToUInt32();
                 this.zstream = Interop.ZSTD_createCStream();
-                this.data = new byte[this.zstreamOutputSize];
+                this.data = cDataPool.TryTake(out data) ? data : new byte[this.zstreamOutputSize];
             }
 
             if (mode == CompressionMode.Decompress)
@@ -54,7 +59,7 @@ namespace Zstandard.Net
                 this.zstreamInputSize = Interop.ZSTD_DStreamInSize().ToUInt32();
                 this.zstreamOutputSize = Interop.ZSTD_DStreamOutSize().ToUInt32();
                 this.zstream = Interop.ZSTD_createDStream();
-                this.data = new byte[this.zstreamInputSize];
+                this.data = dDataPool.TryTake(out data) ? data : new byte[this.zstreamInputSize];
             }
         }
 
@@ -149,6 +154,22 @@ namespace Zstandard.Net
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
+
+            if (this.isDisposed == false)
+            {
+                if (mode == CompressionMode.Compress && cDataPool.Count < 8)
+                {
+                    cDataPool.Add(this.data);
+                }
+
+                if (mode == CompressionMode.Decompress && dDataPool.Count < 8)
+                {
+                    dDataPool.Add(this.data);
+                }
+
+                this.isDisposed = true;
+                this.data = null;
+            }
         }
 
         public override void Close()
