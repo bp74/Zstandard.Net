@@ -11,8 +11,8 @@
     <PackageLicenseUrl>https://github.com/bp74/Zstandard.Net/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/bp74/Zstandard.Net</RepositoryUrl>
     <PackageTags>Compression Stream Zstandard Zstd</PackageTags>
-    <PackageReleaseNotes>Updated native Windows Dll to 1.3.4</PackageReleaseNotes>
-    <Version>1.1.4</Version>
+    <PackageReleaseNotes>Updated native Windows Dll to 1.3.5</PackageReleaseNotes>
+    <Version>1.1.5</Version>
   </PropertyGroup>
 
 	<ItemGroup>
