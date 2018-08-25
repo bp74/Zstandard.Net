@@ -17,7 +17,7 @@ namespace Zstandard.Net
             get
             {
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X86) return new NativeLibrary(@"build\x86\libzstd.dll");
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X64) return new NativeLibrary(@"build\x86\libzstd.dll");
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X64) return new NativeLibrary(@"build\x64\libzstd.dll");
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return new NativeLibrary(@"build\"); //TODO: Edit to relative file location.
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return new NativeLibrary(@"build\"); //TODO: Edit to relative file location.
                 else throw new PlatformNotSupportedException();
@@ -48,8 +48,8 @@ namespace Zstandard.Net
         {
             if (ZSTD_isError(code))
             {
-                IntPtr errorPtr = ZSTD_getErrorName(code);
-                string errorMsg = Marshal.PtrToStringAnsi(errorPtr);
+                var errorPtr = ZSTD_getErrorName(code);
+                var errorMsg = Marshal.PtrToStringAnsi(errorPtr);
                 throw new IOException(errorMsg);
             }
         }
