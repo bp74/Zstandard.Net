@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -13,7 +13,14 @@ namespace Zstandard.Net
                 var root = Path.GetDirectoryName(typeof(ZstandardInterop).Assembly.Location);
                 var path = Environment.Is64BitProcess ? "x64" : "x86";
                 var file = Path.Combine(root, path, "libzstd.dll");
-                LoadLibraryEx(file, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
+                var handle = LoadLibraryEx(file, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
+                if (handle == IntPtr.Zero)
+                {
+                    //if we are running under .net core we may be located in nuget cache
+                    //in that case probe application directory
+                    LoadLibraryEx(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path, "libzstd.dll"),
+                        IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
+                }
             }
         }
 
