@@ -222,16 +222,16 @@ namespace Zstandard.Net
                     var inputSize = this.dataSize - this.dataPosition;
 
                     // read data from input stream 
-                    if (inputSize <= 0 && this.dataDepleted == false && !this.dataSkipRead)
+                    if (inputSize <= 0 && !this.dataDepleted && !this.dataSkipRead)
                     {
                         this.dataSize = this.stream.Read(this.data, 0, (int)this.zstreamInputSize);
                         this.dataDepleted = this.dataSize <= 0;
                         this.dataPosition = 0;
                         inputSize = this.dataDepleted ? 0 : this.dataSize;
-						
-						// skip stream.Read until the internal buffer is depleted
-						// avoids a Read timeout for applications that know the exact number of bytes in the stream
-						this.dataSkipRead = true;
+
+                        // skip stream.Read until the internal buffer is depleted
+                        // avoids a Read timeout for applications that know the exact number of bytes in the stream
+                        this.dataSkipRead = true;
                     }
 
                     // configure the inputBuffer
@@ -250,13 +250,13 @@ namespace Zstandard.Net
                     // calculate progress in outputBuffer
                     var outputBufferPosition = (int)this.outputBuffer.Position.ToUInt32();
                     if (outputBufferPosition == 0)
-					{
-						// the internal buffer is depleted, we're either done
-						if (this.dataDepleted) break;
+                    {
+                        // the internal buffer is depleted, we're either done
+                        if (this.dataDepleted) break;
 
-						// or we need more bytes
-						this.dataSkipRead = false;
-					}
+                        // or we need more bytes
+                        this.dataSkipRead = false;
+                    }
                     length += outputBufferPosition;
                     offset += outputBufferPosition;
                     count -= outputBufferPosition;
