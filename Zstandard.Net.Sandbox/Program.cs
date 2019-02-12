@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Zstandard.Net.Sandbox
 {
-    class Program
+    static class Program
     {
         static void Main(string[] args)
         {
