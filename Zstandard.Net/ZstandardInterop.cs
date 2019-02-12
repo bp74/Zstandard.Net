@@ -16,10 +16,10 @@ namespace Zstandard.Net
         {
             get
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X86) return new NativeLibrary(@"build\x86\libzstd.dll");
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X64) return new NativeLibrary(@"build\x64\libzstd.dll");
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return new NativeLibrary(@"build\"); //TODO: Edit to relative file location.
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return new NativeLibrary(@"build\"); //TODO: Edit to relative file location.
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X86) return new NativeLibrary(@"x86\libzstd.dll");
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X64) return new NativeLibrary(@"x64\libzstd.dll");
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return new NativeLibrary(@"linux/libzstd.so"); //TODO: Edit to relative file location.
+                //else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return new NativeLibrary(@"build\"); //TODO: Edit to relative file location.
                 else throw new PlatformNotSupportedException();
             }
         }
