@@ -6,7 +6,7 @@ using Zstandard.Net.Benchmark.Tests;
 
 namespace Zstandard.Net.Benchmark
 {
-    class Program
+    static class Program
     {
         static void Main(string[] args)
         {
