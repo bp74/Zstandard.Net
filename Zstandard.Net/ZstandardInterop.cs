@@ -16,11 +16,57 @@ namespace Zstandard.Net
         {
             get
             {
+
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X86) return new NativeLibrary(@"x86\libzstd.dll");
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X64) return new NativeLibrary(@"x64\libzstd.dll");
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return new NativeLibrary(@"linux/libzstd.so"); //TODO: Edit to relative file location.
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X64) return new NativeLibrary(@"x64\libzstd.dll");
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+
+                    if (File.Exists("linux/libzstd.so"))
+                    {
+                        try
+                        {
+                            return new NativeLibrary(@"linux/libzstd.so");
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+
+                    //// Debian
+                    if (File.Exists("/usr/lib/x86_64-linux-gnu/libzstd.so.1.3.8"))
+                    {
+                        try
+                        {
+                            return new NativeLibrary(@"libzstd.so.1.3.8");
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    //// Alpine
+                    if (File.Exists("/usr/lib/libzstd.so.1"))
+                    {
+                        try
+                        {
+                            return new NativeLibrary(@"libzstd.so.1");
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+
+                    // try and fail miserably
+                    return new NativeLibrary(@"libzstd.so.1");
+
+                }
+
                 //else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return new NativeLibrary(@"build\"); //TODO: Edit to relative file location.
-                else throw new PlatformNotSupportedException();
+
+                throw new PlatformNotSupportedException();
             }
         }
 #else
