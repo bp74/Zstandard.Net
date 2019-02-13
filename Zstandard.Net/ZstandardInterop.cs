@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 
 namespace Zstandard.Net
 {
-
     internal static class Kernel32
     {
         //https://docs.microsoft.com/en-us/windows/desktop/api/libloaderapi/nf-libloaderapi-loadlibraryexa
@@ -56,7 +55,6 @@ namespace Zstandard.Net
         public static extern IntPtr dlerror();
     }
 
-
     internal static class ZstandardInterop
     {
         static ZstandardInterop()
@@ -80,7 +78,7 @@ namespace Zstandard.Net
                 string rootDirectory = AppDomain.CurrentDomain.BaseDirectory;
                 string assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-                var isOsx = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+                var isOsx = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
                 string libFile = isOsx ? "libzstd.dylib" : "libzstd.so";
                 // https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
@@ -121,7 +119,6 @@ namespace Zstandard.Net
 
                 throw new Exception("NIXERROR: dlopen failed: unable to locate library " + libFile + ". Searched: " + paths.Aggregate((a, b) => a + "; " + b));
 
-
             }
         }
 
@@ -142,13 +139,6 @@ namespace Zstandard.Net
                 throw new IOException(errorMsg);
             }
         }
-
-        //-----------------------------------------------------------------------------------------
-        //-----------------------------------------------------------------------------------------
-
-
-        //[DllImport("kernel32", SetLastError = true)]
-        //private static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hReservedNull, LoadLibraryFlags dwFlags);
 
         //-----------------------------------------------------------------------------------------
         //-----------------------------------------------------------------------------------------
