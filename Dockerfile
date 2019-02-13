@@ -9,11 +9,10 @@
 ### BUILD IN ALPINE - TESTED PASSED
 FROM microsoft/dotnet:2.2-sdk-alpine3.8 AS alpine
 #zstd-libs in apk is 1.3.4
-RUN apk add --no-cache libc6-compat zstd-libs
-
+RUN apk add --no-cache libc6-compat
+ENV ALPINE=TRUE
 WORKDIR /src
 COPY ./ ./
-#RUN cp /src/Zstandard.Net/build/linux/* /usr/lib/ -f
 
 RUN dotnet test
 
@@ -28,7 +27,6 @@ RUN apt-get update \
     
 WORKDIR /src
 COPY ./ ./
-RUN cp /src/Zstandard.Net/build/linux/* /usr/lib/x86_64-linux-gnu/ -f
 
 RUN dotnet test
 
@@ -38,11 +36,10 @@ FROM microsoft/dotnet:2.2-sdk-bionic AS bionic
 
 # libzstd1 is 1.3.3 which passes the tests
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libc6-dev libzstd1
+    && apt-get install -y --no-install-recommends libc6-dev
         
 WORKDIR /src
 COPY ./ ./
-RUN cp /src/Zstandard.Net/build/linux/* /usr/lib/x86_64-linux-gnu/ -f
 
 RUN dotnet test
 

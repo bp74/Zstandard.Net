@@ -22,11 +22,11 @@ namespace Zstandard.Net
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
 
-                    if (File.Exists("linux/libzstd.so"))
+                    if (Environment.GetEnvironmentVariable("ALPINE") != null)
                     {
                         try
                         {
-                            return new NativeLibrary(@"linux/libzstd.so");
+                            return new NativeLibrary(@"alpinelibzstd.so");
                         }
                         catch
                         {
@@ -34,24 +34,11 @@ namespace Zstandard.Net
                     }
 
 
-                    //// Debian
-                    if (File.Exists("/usr/lib/x86_64-linux-gnu/libzstd.so.1.3.8"))
+                    if (File.Exists(AppContext.BaseDirectory + "libzstd.so"))
                     {
                         try
                         {
-                            return new NativeLibrary(@"libzstd.so.1.3.8");
-                        }
-                        catch
-                        {
-                        }
-                    }
-
-                    //// Alpine
-                    if (File.Exists("/usr/lib/libzstd.so.1"))
-                    {
-                        try
-                        {
-                            return new NativeLibrary(@"libzstd.so.1");
+                            return new NativeLibrary(@"libzstd.so");
                         }
                         catch
                         {
@@ -59,8 +46,33 @@ namespace Zstandard.Net
                     }
 
 
-                    // try and fail miserably
-                    return new NativeLibrary(@"libzstd.so.1");
+                    ////// Debian
+                    //if (File.Exists("/usr/lib/x86_64-linux-gnu/libzstd.so.1.3.8"))
+                    //{
+                    //    try
+                    //    {
+                    //        return new NativeLibrary(@"libzstd.so.1.3.8");
+                    //    }
+                    //    catch
+                    //    {
+                    //    }
+                    //}
+
+                    ////// Alpine
+                    //if (File.Exists("/usr/lib/libzstd.so.1"))
+                    //{
+                    //    try
+                    //    {
+                    //        return new NativeLibrary(@"libzstd.so.1");
+                    //    }
+                    //    catch
+                    //    {
+                    //    }
+                    //}
+
+
+                    //// try and fail miserably
+                    //return new NativeLibrary(@"libzstd.so.1");
 
                 }
 
