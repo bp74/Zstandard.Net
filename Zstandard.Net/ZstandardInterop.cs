@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Zstandard.Net
@@ -25,7 +27,7 @@ namespace Zstandard.Net
             LOAD_WITH_ALTERED_SEARCH_PATH = 0x00000008
         }
 
-        [DllImport("kernel32")]
+        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hReservedNull, LoadLibraryFlags dwFlags);
 
         [DllImport("kernel32")]
@@ -37,9 +39,9 @@ namespace Zstandard.Net
 
     internal static class Libdl
     {
-        private const string LibName = "libdl";
+        private const string LibName = "libdl.so";
 
-        public const int RTLD_NOW = 0x002;
+        public const int RTLD_NOW = 2;
 
         [DllImport(LibName)]
         public static extern IntPtr dlopen(string fileName, int flags);
@@ -51,7 +53,7 @@ namespace Zstandard.Net
         public static extern int dlclose(IntPtr handle);
 
         [DllImport(LibName)]
-        public static extern string dlerror();
+        public static extern IntPtr dlerror();
     }
 
 
@@ -62,7 +64,7 @@ namespace Zstandard.Net
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var root = AppContext.BaseDirectory;//Path.GetDirectoryName(typeof(ZstandardInterop).Assembly.Location);
-                var path = Environment.Is64BitProcess ? "win-x64" : "win-x86";
+                var path = RuntimeInformation.ProcessArchitecture == Architecture.X64 ? "win-x64" : "win-x86";
                 var file = Path.Combine(root, path, "libzstd.dll");
 
                 if (!File.Exists(file))
@@ -73,18 +75,53 @@ namespace Zstandard.Net
                 Kernel32.LoadLibraryEx(file, IntPtr.Zero, Kernel32.LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && RuntimeInformation.ProcessArchitecture == Architecture.X64)
             {
-                var root = AppContext.BaseDirectory;//Path.GetDirectoryName(typeof(ZstandardInterop).Assembly.Location);
-                var path = File.Exists("/etc/alpine-release") ? "linuxalpine" : "linuxdebian";
-                var file = $"{root}{path}/libzstd.so";
+                string rootDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-                if(!File.Exists(file))
+                var isOsx = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
+                string libFile = isOsx ? "libzstd.dylib" : "libzstd.so";
+                // https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
+                string arch = (isOsx ? "osx" : "linux") /*+ "-" + (Environment.Is64BitProcess ? "x64" : "x86")*/;
+
+                var distro = File.Exists("/etc/alpine-release") ? "alpine" : "debian";
+
+                var paths = new[]
                 {
-                    throw new FileNotFoundException("Couldn't Load ZSTD lib:"+ file, file);
+                    // This is where native libraries in our nupkg should end up
+                    Path.Combine(rootDirectory, arch + distro, libFile),
+                    //
+                    Path.Combine(rootDirectory, libFile),
+                    Path.Combine("/usr/local/lib", libFile),
+                    Path.Combine("/usr/lib", libFile)
+                };
+
+                foreach (var path in paths)
+                {
+                    if (path == null)
+                    {
+                        continue;
+                    }
+
+                    if (File.Exists(path))
+                    {
+                        var addr = Libdl.dlopen(path, Libdl.RTLD_NOW);
+                        if (addr == IntPtr.Zero)
+                        {
+                            // Not using NanosmgException because it depends on nn_errno.
+                            var error = Marshal.PtrToStringAnsi(Libdl.dlerror());
+                            throw new Exception("dlopen failed: " + path + " : " + error);
+                        }
+
+                        return;
+                    }
                 }
 
-                Libdl.dlopen(file, Libdl.RTLD_NOW);
+                throw new Exception("NIXERROR: dlopen failed: unable to locate library " + libFile + ". Searched: " + paths.Aggregate((a, b) => a + "; " + b));
+
+
             }
         }
 
