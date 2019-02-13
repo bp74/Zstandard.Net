@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Condition="'$(Platform)' == 'AnyCPU'">
+		<None Include="$(MSBuildThisFileDirectory)win-x64\libzstd.dll">
+			<Link>win-x64\%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(MSBuildThisFileDirectory)win-x86\libzstd.dll">
+			<Link>win-x86\%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+      <None Include="$(MSBuildThisFileDirectory)linuxdebian\libzstd.so">
+        <Link>linuxdebian\%(FileName)%(Extension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="$(MSBuildThisFileDirectory)linuxalpine\libzstd.so">
+        <Link>linuxalpine\%(FileName)%(Extension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="$(MSBuildThisFileDirectory)win-x64\libzstd.dll" Condition="'$(Platform)' == 'x64'">
+			<Link>%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(MSBuildThisFileDirectory)win-x86\libzstd.dll" Condition="'$(Platform)' == 'x86'">
+			<Link>%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+</Project>

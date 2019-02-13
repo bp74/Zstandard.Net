@@ -22,6 +22,27 @@
     <ProjectReference Include="..\Zstandard.Net\Zstandard.Net.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Core'">
+    <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+  </PropertyGroup>
+
+
+  <ItemGroup Condition=" ('$(Platform)' == 'x64' OR '$(Platform)' == 'AnyCPU') AND '$(IsWindows)' == true">
+    <NativeLib Include="../Zstandard.Net/build/win-x64/libzstd.dll" />
+  </ItemGroup>
+  <ItemGroup Condition=" ('$(Platform)' == 'x64' OR '$(Platform)' == 'AnyCPU') AND '$(IsLinux)'  == true">
+    <NativeLib Include="../Zstandard.Net/build/linuxdebian/libzstd.so" />
+  </ItemGroup>
+
+  <Target Name="CopyNativeLib" AfterTargets="Build">
+    <Copy SourceFiles="@(NativeLib)" DestinationFolder="$(OutputPath)" />
+  </Target>
+
   <ItemGroup>
     <None Update="Data\loremipsum.zdict">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

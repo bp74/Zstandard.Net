@@ -13,6 +13,7 @@ RUN apk add --no-cache libc6-compat
 ENV ALPINE=TRUE
 WORKDIR /src
 COPY ./ ./
+RUN ls /src/Zstandard.Net.Tests/bin/
 
 RUN dotnet test
 
