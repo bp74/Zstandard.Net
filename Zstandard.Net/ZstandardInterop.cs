@@ -17,8 +17,8 @@ namespace Zstandard.Net
             get
             {
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X86) return new NativeLibrary(@"x86\libzstd.dll");
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X64) return new NativeLibrary(@"x64\libzstd.dll");
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X86) return new NativeLibrary(@"runtimes\win-x86\libzstd.dll");
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X64) return new NativeLibrary(@"runtimes\win-x64\libzstd.dll");
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     // Detect Alpine
@@ -26,7 +26,7 @@ namespace Zstandard.Net
                     {
                         try
                         {
-                            return new NativeLibrary(@"alpinelibzstd.so");
+                            return new NativeLibrary(@"runtimes/linux/alpine.libzstd.so.1.3.8");
                         }
                         catch
                         {
@@ -34,11 +34,11 @@ namespace Zstandard.Net
                     }
 
                     // Fallback
-                    if (File.Exists(AppContext.BaseDirectory + "libzstd.so"))
+                    if (File.Exists(Path.Combine(AppContext.BaseDirectory + "runtimes/linux/libzstd.so.1.3.8")))
                     {
                         try
                         {
-                            return new NativeLibrary(@"libzstd.so");
+                            return new NativeLibrary(@"runtimes/linux/libzstd.so.1.3.8");
                         }
                         catch
                         {
