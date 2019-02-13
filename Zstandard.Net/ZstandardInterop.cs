@@ -21,8 +21,8 @@ namespace Zstandard.Net
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && RuntimeInformation.OSArchitecture == Architecture.X64) return new NativeLibrary(@"x64\libzstd.dll");
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-
-                    if (Environment.GetEnvironmentVariable("ALPINE") != null)
+                    // Detect Alpine
+                    if (File.Exists("/etc/alpine-release"))
                     {
                         try
                         {
@@ -33,7 +33,7 @@ namespace Zstandard.Net
                         }
                     }
 
-
+                    // Fallback
                     if (File.Exists(AppContext.BaseDirectory + "libzstd.so"))
                     {
                         try
@@ -44,36 +44,6 @@ namespace Zstandard.Net
                         {
                         }
                     }
-
-
-                    ////// Debian
-                    //if (File.Exists("/usr/lib/x86_64-linux-gnu/libzstd.so.1.3.8"))
-                    //{
-                    //    try
-                    //    {
-                    //        return new NativeLibrary(@"libzstd.so.1.3.8");
-                    //    }
-                    //    catch
-                    //    {
-                    //    }
-                    //}
-
-                    ////// Alpine
-                    //if (File.Exists("/usr/lib/libzstd.so.1"))
-                    //{
-                    //    try
-                    //    {
-                    //        return new NativeLibrary(@"libzstd.so.1");
-                    //    }
-                    //    catch
-                    //    {
-                    //    }
-                    //}
-
-
-                    //// try and fail miserably
-                    //return new NativeLibrary(@"libzstd.so.1");
-
                 }
 
                 //else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return new NativeLibrary(@"build\"); //TODO: Edit to relative file location.

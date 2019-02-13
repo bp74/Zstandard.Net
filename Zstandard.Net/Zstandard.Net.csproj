@@ -11,8 +11,8 @@
     <PackageLicenseUrl>https://github.com/bp74/Zstandard.Net/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/bp74/Zstandard.Net</RepositoryUrl>
     <PackageTags>Compression Stream Zstandard Zstd</PackageTags>
-    <PackageReleaseNotes>Updated native Windows Dll to 1.3.8 and System.Buffers to 4.5.0</PackageReleaseNotes>
-    <Version>1.1.6</Version>
+    <PackageReleaseNotes>Added alpine and nix build of libzstd, added NativeLibraryLoader to resolve on nix/docker</PackageReleaseNotes>
+    <Version>1.1.7</Version>
     <Configurations>Debug;Release;Sandbox</Configurations>
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
@@ -42,7 +42,7 @@
       <Link>libzstd.so</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="build\linux\alpine.libzstd.so.1.3.4">
+    <None Include="build\linux\alpine.libzstd.so.1.3.8">
       <Link>alpinelibzstd.so</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
