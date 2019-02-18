@@ -10,7 +10,7 @@ namespace Zstandard.Net.Tests
         public void ZstandardStream_PropertyVersion_IsValid()
         {
             var value = ZstandardStream.Version;
-            Assert.AreEqual(new Version(1, 3, 5), value);
+            Assert.AreEqual(new Version(1, 3, 8), value);
         }
 
         [TestMethod]
