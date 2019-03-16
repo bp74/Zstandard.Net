@@ -156,6 +156,7 @@ namespace Zstandard.Net
 
             if (this.isDisposed == false)
             {
+                if (!this.isClosed) ReleaseResources(flushStream: false);
                 this.arrayPool.Return(this.data, clearArray: false);
                 this.isDisposed = true;
                 this.data = null;
@@ -164,27 +165,43 @@ namespace Zstandard.Net
 
         public override void Close()
         {
-            if (this.isClosed)
-            {
-                // do nothing
-            }
-            else if (this.mode == CompressionMode.Compress)
-            {
-                this.ProcessStream((zcs, buffer) => Interop.ThrowIfError(Interop.ZSTD_flushStream(zcs, buffer)));
-                this.ProcessStream((zcs, buffer) => Interop.ThrowIfError(Interop.ZSTD_endStream(zcs, buffer)));
-                this.stream.Flush();
+            if (this.isClosed) return;
 
-                Interop.ZSTD_freeCStream(this.zstream);
-                if (!this.leaveOpen) this.stream.Close();
+            try
+            {
+                ReleaseResources(flushStream: true);
+            }
+            finally
+            {
+                this.isClosed = true;
+                base.Close();
+            }
+        }
+
+        private void ReleaseResources(bool flushStream)
+        {
+            if (this.mode == CompressionMode.Compress)
+            {
+                try
+                {
+                    if(flushStream)
+                    {
+                        this.ProcessStream((zcs, buffer) => Interop.ThrowIfError(Interop.ZSTD_flushStream(zcs, buffer)));
+                        this.ProcessStream((zcs, buffer) => Interop.ThrowIfError(Interop.ZSTD_endStream(zcs, buffer)));
+                        this.stream.Flush();
+                    }
+                }
+                finally
+                {
+                    Interop.ZSTD_freeCStream(this.zstream);
+                    if (!this.leaveOpen) this.stream.Close();
+                }
             }
             else if (this.mode == CompressionMode.Decompress)
             {
                 Interop.ZSTD_freeDStream(this.zstream);
                 if (!this.leaveOpen) this.stream.Close();
             }
-
-            this.isClosed = true;
-            base.Close();
         }
 
         public override void Flush()
@@ -292,6 +309,8 @@ namespace Zstandard.Net
                     var result = this.CompressionDictionary == null
                         ? Interop.ZSTD_initCStream(this.zstream, this.CompressionLevel)
                         : Interop.ZSTD_initCStream_usingCDict(this.zstream, this.CompressionDictionary.GetCompressionDictionary(this.CompressionLevel));
+
+                    Interop.ThrowIfError(result);
                 }
 
                 while (count > 0)
