@@ -25,14 +25,21 @@
 			<Link>x86\%(FileName)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+    <!-- TODO: Add native binaries for linux and macOS, but only for netstndard. -->
 	</ItemGroup>
-  
+
 	<ItemGroup>
 		<None Include="build\**\*" Pack="true" PackagePath="build\" />
 	</ItemGroup>
-  
+
 	<ItemGroup>
 	  <PackageReference Include="System.Buffers" Version="4.5.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+	  <PackageReference Include="NativeLibraryLoader">
+	    <Version>1.0.10</Version>
+	  </PackageReference>
 	</ItemGroup>
 
 </Project>
