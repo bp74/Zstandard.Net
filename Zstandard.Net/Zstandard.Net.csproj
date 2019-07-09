@@ -15,6 +15,7 @@
     <Version>1.2.6</Version>
     <Configurations>Debug;Release;Sandbox</Configurations>
     <IsTestProject>false</IsTestProject>
+    <PackageReleaseNotes>fixed unmanaged resource leak</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
