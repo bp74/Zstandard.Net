@@ -8,7 +8,7 @@ namespace Zstandard.Net.Benchmark
         public DontForceGcCollectionsConfig()
         {
             // tell BenchmarkDotNet not to force GC collections after every iteration
-            Add(Job.Default.With(new GcMode() { Force = false }));
+            AddJob(Job.Default.WithGcMode(new GcMode() { Force = false }));
         }
     }
 }
