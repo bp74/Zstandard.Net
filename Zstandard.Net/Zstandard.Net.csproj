@@ -11,9 +11,10 @@
     <PackageLicenseUrl>https://github.com/bp74/Zstandard.Net/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/bp74/Zstandard.Net</RepositoryUrl>
     <PackageTags>Compression Stream Zstandard Zstd</PackageTags>
-    <PackageReleaseNotes>fixed unmanaged resource leak
-</PackageReleaseNotes>
-    <Version>1.1.7</Version>
+    <PackageReleaseNotes>Native Windows dlls updated to 1.4.5</PackageReleaseNotes>
+    <Version>1.1.8</Version>
+    <AssemblyVersion>1.1.8.0</AssemblyVersion>
+    <FileVersion>1.1.8.0</FileVersion>
   </PropertyGroup>
 
 	<ItemGroup>
