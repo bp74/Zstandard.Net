@@ -224,6 +224,7 @@ namespace Zstandard.Net
             try
             {
                 var length = 0;
+                var endOfBlockFound = false;
 
                 if (this.isInitialized == false)
                 {
@@ -262,14 +263,22 @@ namespace Zstandard.Net
                     this.outputBuffer.Position = UIntPtr.Zero;
 
                     // decompress inputBuffer to outputBuffer
-                    Interop.ThrowIfError(Interop.ZSTD_decompressStream(this.zstream, this.outputBuffer, this.inputBuffer));
+                    var nextSrcNeeded = Interop.ZSTD_decompressStream(this.zstream, this.outputBuffer, this.inputBuffer);
+                    Interop.ThrowIfError(nextSrcNeeded);
+
+                    //It is possible that nextSrcNeeded == 0 when at the end of a block but outputBufferPosition is not yet 0, and there are not any more bytes to be read on the incoming stream.
+                    //If that happens the next time ZSTD_decompressStream() is called then nextSrcNeeded will be the next header size (i.e. 9) instead of 0, then when when outputBufferPosition does hit 0
+                    //it will not "break" which will result in an additional stream read, which can hang.
+                    //To avoid that we need to set a flag when nextSrcNeeded == 0, so when outputBufferPosition also reaches 0, it will hit the "break".
+                    if (nextSrcNeeded.ToUInt64() == 0UL) endOfBlockFound = true;
 
                     // calculate progress in outputBuffer
                     var outputBufferPosition = (int)this.outputBuffer.Position.ToUInt32();
+
                     if (outputBufferPosition == 0)
                     {
                         // the internal buffer is depleted, we're either done
-                        if (this.dataDepleted) break;
+                        if (this.dataDepleted || endOfBlockFound) break;
 
                         // or we need more bytes
                         this.dataSkipRead = false;
