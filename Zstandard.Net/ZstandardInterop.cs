@@ -12,7 +12,7 @@ namespace Zstandard.Net
             {
                 var root = Path.GetDirectoryName(typeof(ZstandardInterop).Assembly.Location);
                 var path = Environment.Is64BitProcess ? "x64" : "x86";
-                var file = Path.Combine(root, path, "libzstd.dll");
+                var file = Path.Combine(root ?? string.Empty, path, "libzstd.dll");
                 LoadLibraryEx(file, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
             }
         }
