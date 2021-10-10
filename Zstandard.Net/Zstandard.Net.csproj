@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <RootNamespace>Zstandard.Net</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>bp74</Authors>
@@ -11,8 +11,7 @@
     <PackageLicenseUrl>https://github.com/bp74/Zstandard.Net/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/bp74/Zstandard.Net</RepositoryUrl>
     <PackageTags>Compression Stream Zstandard Zstd</PackageTags>
-    <PackageReleaseNotes>fixed unmanaged resource leak
-</PackageReleaseNotes>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>1.1.8</Version>
   </PropertyGroup>
 
@@ -24,16 +23,10 @@
 	</ItemGroup>
   
 	<ItemGroup>
-		<None Include="build\**\*" Pack="true" PackagePath="build\" />
+		<None Include="build\x64\zstd.dll" Pack="true" PackagePath="runtimes/win-x64/native/zstd.dll" />
 	</ItemGroup>
   
 	<ItemGroup>
-	  <PackageReference Include="System.Buffers" Version="4.5.0" />
+	  <PackageReference Include="System.Buffers" Version="4.5.1" />
 	</ItemGroup>
-
-
-	<Target BeforeTargets="Build" Name="DownloadCmake">
-		<MakeDir Directories="tools" />
-		<Exec WorkingDirectory="tools">curl.exe -L -O https://github.com/Kitware/CMake/releases/download/v3.21.1/cmake-3.21.1-windows-x86_64.zip </Exec>
-	</Target>
 </Project>
