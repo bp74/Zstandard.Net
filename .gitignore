@@ -286,3 +286,9 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+
+CMakeCache.txt
+CMakeFiles/
+MSBuild_Logs/
+cmake_uninstall.cmake
+native_build/

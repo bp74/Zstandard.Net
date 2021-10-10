@@ -1,0 +1,3 @@
+REM cmake.exe -G "Visual Studio 16 2019" -A x64 -B native_build -S zstd\build\cmake -DCMAKE_BUILD_TYPE=Release -DZSTD_BUILD_PROGRAMS=false -DZSTD_BUILD_CONTRIB=false -DZSTD_BUILD_SHARED=True -DCMAKE_INSTALL_PREFIX=.\Zstandard.Net\Zstandard.Net\build\x64 -DVcpkgEnabled=false
+REM msbuild native_build\zstd.sln /p:Configuration=Release /p:Platform="x64" /p:VcpkgEnabled=false /p:OutDir=.\Zstandard.Net\Zstandard.Net\build\x64
+dotnet build -c Release

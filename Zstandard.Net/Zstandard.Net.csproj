@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <RootNamespace>Zstandard.Net</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>bp74</Authors>
@@ -11,28 +11,22 @@
     <PackageLicenseUrl>https://github.com/bp74/Zstandard.Net/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/bp74/Zstandard.Net</RepositoryUrl>
     <PackageTags>Compression Stream Zstandard Zstd</PackageTags>
-    <PackageReleaseNotes>fixed unmanaged resource leak
-</PackageReleaseNotes>
-    <Version>1.1.7</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.1.8</Version>
   </PropertyGroup>
 
 	<ItemGroup>
-		<None Include="build\x64\libzstd.dll">
+		<None Include="build\x64\zstd.dll">
 			<Link>x64\%(FileName)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="build\x86\libzstd.dll">
-			<Link>x86\%(FileName)%(Extension)</Link>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 	</ItemGroup>
   
 	<ItemGroup>
-		<None Include="build\**\*" Pack="true" PackagePath="build\" />
+		<None Include="build\x64\zstd.dll" Pack="true" PackagePath="runtimes/win-x64/native/zstd.dll" />
 	</ItemGroup>
   
 	<ItemGroup>
-	  <PackageReference Include="System.Buffers" Version="4.5.0" />
+	  <PackageReference Include="System.Buffers" Version="4.5.1" />
 	</ItemGroup>
-
 </Project>

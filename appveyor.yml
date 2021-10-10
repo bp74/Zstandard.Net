@@ -1,0 +1,17 @@
+#version: 1.0.{build}
+image: Visual Studio 2019
+
+branches:
+  only:
+  - feature/submodule
+
+build:
+  verbosity: minimal
+
+install:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - git submodule update --init --recursive
+
+build_script:
+ - cmake -G "Visual Studio 16 2019" -A x64 -B native_build -S zstd\build\cmake -DCMAKE_BUILD_TYPE=Release -DZSTD_BUILD_PROGRAMS=false -DZSTD_BUILD_CONTRIB=false -DZSTD_BUILD_SHARED=True -DCMAKE_INSTALL_PREFIX=.\Zstandard.Net\Zstandard.Net\build\x64 -DVcpkgEnabled=false
+ - msbuild native_build\zstd.sln /p:Configuration=Release /p:Platform="x64" /p:VcpkgEnabled=false /p:OutDir=.\Zstandard.Net\Zstandard.Net\build\x64
